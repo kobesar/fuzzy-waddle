@@ -1,0 +1,193 @@
+.prediction-panel h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.preset-scenarios {
+  margin-bottom: 2rem;
+}
+
+.preset-scenarios h4 {
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.preset-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.5rem;
+}
+
+.preset-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.context-controls {
+  background: #f8f9ff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.context-controls h4 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.count-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.count-box {
+  background: white;
+  border: 3px solid #667eea;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.count-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.count-value {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.count-separator {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.control-group {
+  margin-bottom: 1.5rem;
+}
+
+.control-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #ddd;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  border: none;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  cursor: pointer;
+}
+
+.control-group input[type="checkbox"] {
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.predict-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.prediction-results {
+  margin-top: 2rem;
+}
+
+.prediction-results h4 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.probability-list {
+  margin-top: 1.5rem;
+}
+
+.probability-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 80px;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9ff;
+  border-radius: 8px;
+}
+
+.pitch-type {
+  font-weight: 700;
+  color: #333;
+}
+
+.probability-bar-container {
+  background: #e0e0e0;
+  border-radius: 8px;
+  height: 24px;
+  overflow: hidden;
+}
+
+.probability-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+
+.probability-value {
+  font-weight: 600;
+  color: #667eea;
+  text-align: right;
+}

@@ -1,0 +1,163 @@
+.pitcher-dashboard h2 {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.pitcher-info-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.pitcher-info-card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.model-status {
+  background: #f8f9ff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.model-status h4 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.status-ready,
+.status-not-ready {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.status-ready {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-not-ready {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+}
+
+.train-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.repertoire-section {
+  margin-top: 1.5rem;
+}
+
+.repertoire-section h4 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.repertoire-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  background: #f8f9ff;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.pitch-types-list {
+  margin-top: 1.5rem;
+}
+
+.pitch-type-item {
+  background: #f8f9ff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.pitch-type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.pitch-type-name {
+  font-weight: 700;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.pitch-type-pct {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 1.1rem;
+}
+
+.pitch-type-details {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
