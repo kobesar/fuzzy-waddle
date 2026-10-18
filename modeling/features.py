@@ -5,6 +5,9 @@ every value for a pitch uses only information available before that pitch.
   hist    pitcher's pitch mix against this batter in all earlier games (any season) and its size
   ingame  pitcher's pitches to this batter earlier in this game (previous plate appearances only,
           by class) and the result of the previous plate appearance against him
+  sit     pitcher's previous-season mix in the current count x batter-side situation (shrunk to his
+          overall previous-season mix)
+  trend   pitcher's mix over his earlier games this season and over his last 3 appearances
 
 `df` must be sorted by (game_pk, pitcher_id, game_pitch_number) and carry the columns used below.
 """
@@ -121,6 +124,52 @@ def ingame_features(df: pd.DataFrame, oh: np.ndarray) -> np.ndarray:
     return np.concatenate([share, np.log1p(n) / 3, pr], axis=1)
 
 
+def sit_features(df: pd.DataFrame, oh: np.ndarray, alpha: float = 100.0) -> np.ndarray:
+    train = (df.split == "train").to_numpy()
+    g = oh[train].sum(0)
+    g = g / g.sum()
+    cols = [f"c{i}" for i in range(K)]
+    t = pd.DataFrame(oh, columns=cols)
+    t["pitcher_id"], t["season"] = df.pitcher_id.values, df.season.values
+    t["cnt"] = (df.balls.astype(int) * 3 + df.strikes.astype(int)).values
+    t["side"] = (df.batter_stands == "R").astype(int).values
+    ps = t.groupby(["pitcher_id", "season"])[cols].sum()
+    ps = ps[ps.sum(axis=1) >= MIN_BATTER_PITCHES]
+    cell = t.groupby(["pitcher_id", "season", "cnt", "side"])[cols].sum()
+    pos = ps.index.get_indexer(pd.MultiIndex.from_arrays([df.pitcher_id, df.season - 1]))
+    mix = np.tile(g.astype(np.float32), (len(df), 1))
+    ok = pos >= 0
+    mix[ok] = 0.97 * (ps.to_numpy()[pos[ok]] / ps.to_numpy()[pos[ok]].sum(1, keepdims=True)) + 0.03 * g
+    cpos = cell.index.get_indexer(pd.MultiIndex.from_arrays(
+        [df.pitcher_id, df.season - 1, t["cnt"], t["side"]]))
+    c = np.where((cpos >= 0)[:, None], cell.to_numpy()[np.clip(cpos, 0, None)], 0.0).astype(np.float32)
+    c[~ok] = 0.0
+    n = c.sum(1, keepdims=True)
+    post = (c + alpha * mix) / (n + alpha)
+    return np.concatenate([post.astype(np.float32), np.log1p(n) / 6], axis=1)
+
+
+def trend_features(df: pd.DataFrame, oh: np.ndarray) -> np.ndarray:
+    gkey = df[["game_date", "game_pk"]].drop_duplicates().sort_values(["game_date", "game_pk"])
+    gkey["g"] = np.arange(len(gkey))
+    cols = [f"c{i}" for i in range(K)]
+    t = pd.DataFrame(oh, columns=cols)
+    t["pitcher_id"], t["game_pk"], t["season"] = df.pitcher_id.values, df.game_pk.values, df.season.values
+    per = t.groupby(["pitcher_id", "game_pk", "season"], sort=False)[cols].sum().reset_index()
+    per = per.merge(gkey[["game_pk", "g"]], on="game_pk").sort_values(["pitcher_id", "g"]).reset_index(drop=True)
+    std = per.groupby(["pitcher_id", "season"], sort=False)[cols].cumsum() - per[cols]
+    rec = per.groupby("pitcher_id", sort=False)[cols].transform(lambda s: s.shift(1).rolling(3, min_periods=1).sum())
+    out = {}
+    for name, c in (("std", std.to_numpy(np.float32)), ("rec", rec.fillna(0).to_numpy(np.float32))):
+        n = c.sum(1, keepdims=True)
+        share = np.divide(c, n, out=np.zeros_like(c), where=n > 0)
+        out[name] = np.concatenate([share, np.log1p(n) / 6], axis=1)
+    feat = pd.DataFrame(np.concatenate([out["std"], out["rec"]], axis=1))
+    feat["pitcher_id"], feat["game_pk"] = per.pitcher_id.values, per.game_pk.values
+    m = df[["pitcher_id", "game_pk"]].merge(feat, on=["pitcher_id", "game_pk"], how="left")
+    return m.drop(columns=["pitcher_id", "game_pk"]).fillna(0).to_numpy(np.float32)
+
+
 def group_features(df: pd.DataFrame, groups: list) -> np.ndarray:
     if not groups:
         return np.zeros((len(df), 0), dtype=np.float32)
@@ -132,4 +181,8 @@ def group_features(df: pd.DataFrame, groups: list) -> np.ndarray:
         parts.append(hist_features(df, oh))
     if "ingame" in groups:
         parts.append(ingame_features(df, oh))
+    if "sit" in groups:
+        parts.append(sit_features(df, oh))
+    if "trend" in groups:
+        parts.append(trend_features(df, oh))
     return np.concatenate(parts, axis=1)

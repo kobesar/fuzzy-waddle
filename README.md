@@ -226,7 +226,7 @@ Results on test (2025; 724k pitches with a real label; same rows for every model
 
 The GRU is a 2-layer, 192-unit causal model over each pitcher-game sequence. Inputs at each step are the pre-pitch state, the previous pitch (class, call, speed, location) and the pitcher's previous-season mix. On test pitches by pitchers absent from 2017-2023 it scores 0.469 accuracy and 1.274 log loss, so it does not depend on pitcher identity. Variants on validation (log loss): pitcher-id embedding 1.260, train from 2021 only 1.258, 256 units for 14 epochs 1.249, baseline GRU 1.248. Accuracy is lowest late in long outings (41+ pitches: 0.415 accuracy, 1.352 log loss) and highest on the first pitch of an outing (0.548, 1.225).
 
-Matchup features (`modeling/features.py`, `--groups`): `tend` = batter's previous-season swing, zone-swing, chase and whiff rates (overall and per pitch class); `hist` = this pitcher's pitch mix against this batter in earlier games; `ingame` = the pitcher's pitches to this batter in earlier plate appearances of the game and the result of the previous one. All use only information from before the pitch. Test set (2025), one run each:
+Matchup features (`modeling/features.py`, `--groups`): `tend` = batter's previous-season swing, zone-swing, chase and whiff rates (overall and per pitch class); `hist` = this pitcher's pitch mix against this batter in earlier games; `ingame` = the pitcher's pitches to this batter in earlier plate appearances of the game and the result of the previous one; `sit` = the pitcher's previous-season mix in the current count and batter-side situation; `trend` = the pitcher's mix over his earlier games this season and over his last 3 appearances. All use only information from before the pitch. Test set (2025), one run each:
 
 | Features | Val log loss | Test accuracy | Test log loss |
 |---|---|---|---|
@@ -234,18 +234,23 @@ Matchup features (`modeling/features.py`, `--groups`): `tend` = batter's previou
 | + `tend` | 1.250 | 0.460 | 1.282 |
 | + `ingame` | 1.249 | 0.459 | 1.282 |
 | + `hist` | 1.243 | 0.461 | 1.275 |
-| + all three (`gru_all`) | **1.240** | **0.463** | **1.271** |
+| + all three (`gru_all`) | 1.240 | 0.463 | 1.271 |
+| + `sit` (on top of `gru_all`) | 1.237 | 0.464 | 1.267 |
+| + `trend` (on top of `gru_all`) | 1.182 | 0.473 | 1.209 |
+| + `sit` and `trend` (`gru_sit_trend`) | **1.178** | **0.476** | **1.204** |
 
-Two seeds of the base model differ by 0.003 test log loss, so `tend` and `ingame` alone show no gain. `hist` helps by about 0.005 and all three together by about 0.010 (0.8%). `gru_all` is the recommended checkpoint (`modeling/runs/gru_all.pt`; `python modeling/train_sequence.py --name gru_all --groups tend,hist,ingame`).
+Two seeds of the base model differ by 0.003 test log loss, so `tend`, `ingame` and `sit` alone are within noise. `hist` helps by about 0.005. `trend` is the large gain: 0.062 log loss and 1.1 accuracy points over `gru_all`, because the previous-season mix goes stale (19% of pitchers with 400+ pitches in 2025 added a pitch that was under 2% of their 2024 mix, mostly sinkers) and the last three appearances show the current repertoire. `gru_sit_trend` is the recommended checkpoint (`modeling/runs/gru_sit_trend.pt`; `python modeling/train_sequence.py --name gru_sit_trend --groups tend,hist,ingame,sit,trend`).
 
-2026 check (games through 2026-10-17, `python data_prep/baselines.py --pitcher-id 660271` and `python modeling/evaluate.py --pitcher-id 660271`; the model was not retrained):
+Error analysis of `gru_all` on test: predicted probabilities are calibrated (top-pick confidence 0.40-0.50 hits 0.44; 0.80+ hits 0.86), no count, handedness, inning or previous-call slice is off by more than 3.5 points on any class, and 6.7% of pitches with P(actual) under 0.08 account for 19% of log loss. Difficulty is set mainly by arsenal size (pitchers with the narrowest mixes score 0.59 accuracy / 0.88 log loss, the widest 0.38 / 1.54).
 
-| Subset | Pitches | `gru_all` acc / log loss | `gru_mix` acc / log loss | In-game baseline acc / log loss |
-|---|---|---|---|---|
-| 2026 postseason, all pitchers (33 games) | 9,462 | 0.458 / 1.245 | 0.456 / 1.275 | 0.428 / 1.329 |
-| 2026 regular season, all pitchers | 714,102 | 0.443 / 1.327 | 0.441 / 1.335 | 0.402 / 1.428 |
-| Ohtani (660271), 2026 regular season, 14 starts | 1,335 | 0.503 / 1.253 | 0.497 / 1.242 | 0.432 / 1.381 |
-| Ohtani, 2026 postseason | 0 | none | none | none |
+2026 check (games through 2026-10-17, `python data_prep/baselines.py --pitcher-id 660271` and `python modeling/evaluate.py --pitcher-id 660271`; the models were not retrained):
+
+| Subset | Pitches | `gru_sit_trend` acc / log loss | `gru_all` acc / log loss | `gru_mix` acc / log loss | In-game baseline acc / log loss |
+|---|---|---|---|---|---|
+| 2026 postseason, all pitchers (33 games) | 9,462 | 0.472 / 1.177 | 0.458 / 1.245 | 0.456 / 1.275 | 0.428 / 1.329 |
+| 2026 regular season, all pitchers | 714,102 | 0.457 / 1.263 | 0.443 / 1.327 | 0.441 / 1.335 | 0.402 / 1.428 |
+| Ohtani (660271), 2026 regular season, 14 starts | 1,335 | 0.515 / 1.224 | 0.503 / 1.253 | 0.497 / 1.242 | 0.432 / 1.381 |
+| Ohtani, 2026 postseason | 0 | none | none | none | none |
 
 Ohtani has not pitched in the 2026 postseason through 2026-10-17; his last start was 2026-07-03.
 

@@ -1,0 +1,127 @@
+{
+  "args": {
+    "data": "/Users/kobe/Projects/pitch_sequence/data/pitches.parquet",
+    "out": "/Users/kobe/Projects/pitch_sequence/modeling/runs",
+    "name": "gru_sit_trend",
+    "train_from": "2017",
+    "pitcher_emb": "False",
+    "groups": "tend,hist,ingame,sit,trend",
+    "min_id_pitches": "1000",
+    "hidden": "192",
+    "layers": "2",
+    "dropout": "0.2",
+    "epochs": "8",
+    "batch": "256",
+    "lr": "0.002",
+    "seed": "0",
+    "max_seqs": "0"
+  },
+  "val": {
+    "all": {
+      "n": 722011,
+      "acc": 0.4823,
+      "log_loss": 1.1781
+    },
+    "seen": {
+      "n": 641484,
+      "acc": 0.4805,
+      "log_loss": 1.1816
+    },
+    "unseen": {
+      "n": 80527,
+      "acc": 0.4972,
+      "log_loss": 1.1504
+    }
+  },
+  "test": {
+    "all": {
+      "n": 723991,
+      "acc": 0.4761,
+      "log_loss": 1.2036
+    },
+    "seen": {
+      "n": 555364,
+      "acc": 0.473,
+      "log_loss": 1.2101
+    },
+    "unseen": {
+      "n": 168627,
+      "acc": 0.4864,
+      "log_loss": 1.182
+    }
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 1.4447,
+      "val": {
+        "n": 722011,
+        "acc": 0.4489,
+        "log_loss": 1.2853
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.1677,
+      "val": {
+        "n": 722011,
+        "acc": 0.4611,
+        "log_loss": 1.234
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.142,
+      "val": {
+        "n": 722011,
+        "acc": 0.4716,
+        "log_loss": 1.2041
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.1263,
+      "val": {
+        "n": 722011,
+        "acc": 0.4761,
+        "log_loss": 1.1925
+      }
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.1169,
+      "val": {
+        "n": 722011,
+        "acc": 0.4783,
+        "log_loss": 1.1869
+      }
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.1102,
+      "val": {
+        "n": 722011,
+        "acc": 0.4811,
+        "log_loss": 1.1819
+      }
+    },
+    {
+      "epoch": 7,
+      "train_loss": 1.1052,
+      "val": {
+        "n": 722011,
+        "acc": 0.4823,
+        "log_loss": 1.1791
+      }
+    },
+    {
+      "epoch": 8,
+      "train_loss": 1.1031,
+      "val": {
+        "n": 722011,
+        "acc": 0.4823,
+        "log_loss": 1.1781
+      }
+    }
+  ]
+}
