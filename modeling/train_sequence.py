@@ -22,6 +22,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from features import group_features
+
 ROOT = Path(__file__).resolve().parent.parent
 K = 11                      # classes incl. OTHER
 PREV_VOCAB = K + 2          # 0 = start of sequence, 1..K = class, K+1 = unknown label
@@ -30,11 +32,12 @@ MIN_PRIOR_PITCHES = 200
 MAX_LEN = 160
 
 
-def load(path: Path, train_from: int, min_id_pitches: int):
+def load(path: Path, train_from: int, min_id_pitches: int, groups=()):
     cols = ["game_pk", "pitcher_id", "game_pitch_number", "season", "split", "y", "p1", "balls",
             "strikes", "outs", "inning", "is_top", "on_1b", "on_2b", "on_3b", "pitcher_score_diff",
             "batter_stands", "pitcher_throws", "times_through_order", "pitcher_pitch_count",
-            "pitch_number", "call_code", "start_speed", "plate_x", "plate_z", "game_type"]
+            "pitch_number", "call_code", "start_speed", "plate_x", "plate_z", "game_type",
+            "batter_id", "zone", "pa_event_type", "game_date", "at_bat_index"]
     df = pd.read_parquet(path, columns=cols)
     df = df.sort_values(["game_pk", "pitcher_id", "game_pitch_number"], kind="stable").reset_index(drop=True)
 
@@ -78,6 +81,7 @@ def load(path: Path, train_from: int, min_id_pitches: int):
         has_prior.astype(np.float32).to_numpy(),
     ] + [df[c].to_numpy(np.float32) for c in mixcols]
     X = np.stack(feats, axis=1)
+    X = np.concatenate([X, group_features(df, list(groups))], axis=1)
 
     prev_cls = (df.p1.to_numpy() + 1).astype(np.int64)         # -1 start -> 0, class c -> c+1
     prev_cls = np.where(prev_cls > K, K + 1, prev_cls)         # UNK class id (K) -> K+1
@@ -179,6 +183,7 @@ def main() -> None:
     ap.add_argument("--name", default="gru")
     ap.add_argument("--train-from", type=int, default=2017)
     ap.add_argument("--pitcher-emb", action="store_true")
+    ap.add_argument("--groups", default="", help="comma list of matchup feature groups: tend,hist,ingame")
     ap.add_argument("--min-id-pitches", type=int, default=1000)
     ap.add_argument("--hidden", type=int, default=192)
     ap.add_argument("--layers", type=int, default=2)
@@ -194,7 +199,8 @@ def main() -> None:
     rng = np.random.default_rng(a.seed)
     device = "mps" if torch.backends.mps.is_available() else "cpu"
     t0 = time.time()
-    D = load(a.data, a.train_from, a.min_id_pitches)
+    groups = [g for g in a.groups.split(",") if g]
+    D = load(a.data, a.train_from, a.min_id_pitches, groups)
     tr = np.flatnonzero((D["split"] == "train") & (D["season"] >= a.train_from))
     if a.max_seqs:
         tr = tr[: a.max_seqs]

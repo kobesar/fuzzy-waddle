@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -20,13 +21,14 @@ def main() -> None:
     ap.add_argument("--runs", type=Path, default=T.ROOT / "modeling" / "runs")
     ap.add_argument("--name", default="gru_mix")
     ap.add_argument("--pitcher-id", type=int, default=None)
-    ap.add_argument("--hidden", type=int, default=192)
-    ap.add_argument("--layers", type=int, default=2)
     a = ap.parse_args()
 
     device = "mps" if torch.backends.mps.is_available() else "cpu"
-    D = T.load(a.data, 2017, 1000)
-    model = T.PitchGRU(D["X"].shape[1], D["n_pitchers"], False, a.hidden, a.layers, 0.0).to(device)
+    cfg = json.loads((a.runs / f"{a.name}.json").read_text())["args"]
+    groups = [g for g in cfg.get("groups", "").split(",") if g]
+    D = T.load(a.data, int(cfg["train_from"]), int(cfg["min_id_pitches"]), groups)
+    model = T.PitchGRU(D["X"].shape[1], D["n_pitchers"], cfg["pitcher_emb"] == "True",
+                       int(cfg["hidden"]), int(cfg["layers"]), 0.0).to(device)
     model.load_state_dict(torch.load(a.runs / f"{a.name}.pt"))
 
     in26 = D["split"] == "test_2026"
