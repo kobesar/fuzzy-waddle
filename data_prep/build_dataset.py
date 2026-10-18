@@ -13,7 +13,8 @@ Pitch classes: the 10 common types keep their own id, any other real pitch type 
 and missing/non-pitch labels (null, PO, UN, '') get y = -1 and are excluded from training
 targets but stay in the sequence as context (class id UNK in p1..p3).
 
-Splits are by season: train <= 2023, val 2024, test 2025.
+Splits are by season: train <= 2023, val 2024, test 2025, test_2026 (season in progress; refresh
+by recollecting the 2026 shards and rebuilding).
 """
 from __future__ import annotations
 
@@ -30,7 +31,7 @@ CLASSES = ["FF", "SI", "SL", "CH", "CU", "FC", "ST", "KC", "FS", "SV"]
 OTHER = len(CLASSES)        # any other real pitch type (KN, EP, FO, CS, SC, FA)
 UNK = len(CLASSES) + 1      # missing or non-pitch label
 NON_PITCH = {"PO", "UN", ""}
-SPLITS = {"train": (2017, 2023), "val": (2024, 2024), "test": (2025, 2025)}
+SPLITS = {"train": (2017, 2023), "val": (2024, 2024), "test": (2025, 2025), "test_2026": (2026, 2026)}
 
 # Describe the outcome of the pitch itself or of the whole plate appearance. Never inputs.
 LEAKY_COLUMNS = [

@@ -226,6 +226,17 @@ Results on test (2025; 724k pitches with a real label; same rows for every model
 
 The GRU is a 2-layer, 192-unit causal model over each pitcher-game sequence. Inputs at each step are the pre-pitch state, the previous pitch (class, call, speed, location) and the pitcher's previous-season mix. On test pitches by pitchers absent from 2017-2023 it scores 0.469 accuracy and 1.274 log loss, so it does not depend on pitcher identity. Variants on validation (log loss): pitcher-id embedding 1.260, train from 2021 only 1.258, 256 units for 14 epochs 1.249, baseline GRU 1.248. Accuracy is lowest late in long outings (41+ pitches: 0.415 accuracy, 1.352 log loss) and highest on the first pitch of an outing (0.548, 1.225).
 
+2026 check (games through 2026-10-17, `python data_prep/baselines.py --pitcher-id 660271` and `python modeling/evaluate.py --pitcher-id 660271`; the model was not retrained):
+
+| Subset | Pitches | GRU acc / log loss | In-game baseline acc / log loss |
+|---|---|---|---|
+| 2026 postseason, all pitchers (33 games) | 9,462 | 0.456 / 1.275 | 0.428 / 1.329 |
+| 2026 regular season, all pitchers | 714,102 | 0.441 / 1.335 | 0.402 / 1.428 |
+| Ohtani (660271), 2026 regular season, 14 starts | 1,335 | 0.497 / 1.242 | 0.432 / 1.381 |
+| Ohtani, 2026 postseason | 0 | none | none |
+
+Ohtani has not pitched in the 2026 postseason through 2026-10-17; his last start was 2026-07-03.
+
 ## Model Details
 
 ### Algorithm

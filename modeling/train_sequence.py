@@ -34,7 +34,7 @@ def load(path: Path, train_from: int, min_id_pitches: int):
     cols = ["game_pk", "pitcher_id", "game_pitch_number", "season", "split", "y", "p1", "balls",
             "strikes", "outs", "inning", "is_top", "on_1b", "on_2b", "on_3b", "pitcher_score_diff",
             "batter_stands", "pitcher_throws", "times_through_order", "pitcher_pitch_count",
-            "pitch_number", "call_code", "start_speed", "plate_x", "plate_z"]
+            "pitch_number", "call_code", "start_speed", "plate_x", "plate_z", "game_type"]
     df = pd.read_parquet(path, columns=cols)
     df = df.sort_values(["game_pk", "pitcher_id", "game_pitch_number"], kind="stable").reset_index(drop=True)
 
@@ -97,7 +97,7 @@ def load(path: Path, train_from: int, min_id_pitches: int):
     seq_pid = np.array([vocab.get(p, 0) for p in seq_pitcher], dtype=np.int64)
     seen_train = np.isin(seq_pitcher, c.index.to_numpy())
     seq_season = df.season.to_numpy()[starts]
-    return dict(X=X, prev_cls=prev_cls, call_id=call_id.to_numpy(), y=y, starts=starts, lens=lens,
+    return dict(X=X, prev_cls=prev_cls, pitcher=seq_pitcher, game_type=df.game_type.to_numpy()[starts], call_id=call_id.to_numpy(), y=y, starts=starts, lens=lens,
                 split=seq_split, pid=seq_pid, seen=seen_train, season=seq_season, n_pitchers=len(vocab) + 1)
 
 

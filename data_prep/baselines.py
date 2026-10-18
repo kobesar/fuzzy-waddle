@@ -40,10 +40,11 @@ def season_mix(df: pd.DataFrame) -> pd.DataFrame:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--data", type=Path, default=ROOT / "data" / "pitches.parquet")
+    ap.add_argument("--pitcher-id", type=int, default=None, help="also report this pitcher on 2026 subsets")
     ap.add_argument("--beta", type=float, default=None, help="in-game prior weight; default: best on val")
     a = ap.parse_args()
     df = pd.read_parquet(a.data, columns=["game_pk", "pitcher_id", "game_pitch_number", "season",
-                                          "split", "y", "balls", "strikes"])
+                                          "split", "y", "balls", "strikes", "game_type"])
     df = df.sort_values(["game_pk", "pitcher_id", "game_pitch_number"], kind="stable").reset_index(drop=True)
     df["count"] = df.balls * 3 + df.strikes  # 0..11 (strikes capped at 2 -> max 11)
 
@@ -57,7 +58,7 @@ def main() -> None:
 
     mix = season_mix(df)
     mix_idx = mix.index
-    ev = df[df.split.isin(["val", "test"])].copy()
+    ev = df[df.split.isin(["val", "test", "test_2026"])].copy()
 
     # prior-season mix per row
     key = pd.MultiIndex.from_arrays([ev.pitcher_id, ev.season - 1])
@@ -113,6 +114,25 @@ def main() -> None:
     print(pd.DataFrame(rows).to_string(index=False))
     t = keep & (split == "test")
     print(f"test rows with a prior-season mix: {ok[t].mean():.1%}")
+
+    in26 = keep & (split == "test_2026")
+    if in26.any():
+        post = (ev.game_type != "R").to_numpy()
+        subsets = {"2026 postseason, all pitchers": in26 & post, "2026 regular season, all pitchers": in26 & ~post}
+        if a.pitcher_id:
+            pit = (ev.pitcher_id == a.pitcher_id).to_numpy()
+            subsets[f"2026 postseason, pitcher {a.pitcher_id}"] = in26 & post & pit
+            subsets[f"2026 regular season, pitcher {a.pitcher_id}"] = in26 & ~post & pit
+        rows = []
+        for sname, m in subsets.items():
+            if not m.any():
+                rows.append({"subset": sname, "n": 0})
+                continue
+            for name, P in models.items():
+                acc, ll = score(P[m], y[m])
+                rows.append({"subset": sname, "model": name, "n": int(m.sum()),
+                             "top1_acc": round(acc, 4), "log_loss": round(ll, 4)})
+        print(pd.DataFrame(rows).to_string(index=False))
 
 
 if __name__ == "__main__":
