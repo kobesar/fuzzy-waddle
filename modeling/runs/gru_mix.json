@@ -1,0 +1,126 @@
+{
+  "args": {
+    "data": "/Users/kobe/Projects/pitch_sequence/data/pitches.parquet",
+    "out": "/Users/kobe/Projects/pitch_sequence/modeling/runs",
+    "name": "gru_mix",
+    "train_from": "2017",
+    "pitcher_emb": "False",
+    "min_id_pitches": "1000",
+    "hidden": "192",
+    "layers": "2",
+    "dropout": "0.2",
+    "epochs": "8",
+    "batch": "256",
+    "lr": "0.002",
+    "seed": "0",
+    "max_seqs": "0"
+  },
+  "val": {
+    "all": {
+      "n": 722011,
+      "acc": 0.4684,
+      "log_loss": 1.2484
+    },
+    "seen": {
+      "n": 641484,
+      "acc": 0.4667,
+      "log_loss": 1.2478
+    },
+    "unseen": {
+      "n": 80527,
+      "acc": 0.4819,
+      "log_loss": 1.2529
+    }
+  },
+  "test": {
+    "all": {
+      "n": 723991,
+      "acc": 0.4604,
+      "log_loss": 1.2804
+    },
+    "seen": {
+      "n": 555364,
+      "acc": 0.4577,
+      "log_loss": 1.2822
+    },
+    "unseen": {
+      "n": 168627,
+      "acc": 0.4692,
+      "log_loss": 1.2743
+    }
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 1.4791,
+      "val": {
+        "n": 722011,
+        "acc": 0.4384,
+        "log_loss": 1.3363
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1.2223,
+      "val": {
+        "n": 722011,
+        "acc": 0.4528,
+        "log_loss": 1.2842
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.1942,
+      "val": {
+        "n": 722011,
+        "acc": 0.4591,
+        "log_loss": 1.2663
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.1817,
+      "val": {
+        "n": 722011,
+        "acc": 0.462,
+        "log_loss": 1.2608
+      }
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.1722,
+      "val": {
+        "n": 722011,
+        "acc": 0.4635,
+        "log_loss": 1.2569
+      }
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.1657,
+      "val": {
+        "n": 722011,
+        "acc": 0.4676,
+        "log_loss": 1.2513
+      }
+    },
+    {
+      "epoch": 7,
+      "train_loss": 1.1609,
+      "val": {
+        "n": 722011,
+        "acc": 0.4682,
+        "log_loss": 1.2497
+      }
+    },
+    {
+      "epoch": 8,
+      "train_loss": 1.1586,
+      "val": {
+        "n": 722011,
+        "acc": 0.4684,
+        "log_loss": 1.2484
+      }
+    }
+  ]
+}
