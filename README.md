@@ -195,6 +195,32 @@ POST /api/predict/{pitcher_id}
 GET /api/pitchers/{pitcher_id}/summary
 ```
 
+## Training Dataset (sequence model)
+
+Pitch-by-pitch data for 2017-2025 (6.1M pitches, 20.7k games, regular season and postseason) comes from the MLB Stats API live feed, not the per-pitcher fetch used by the backend.
+
+```bash
+pip install -r data_collection/requirements.txt
+python data_collection/statsapi_pitch_collector.py --start-year 2017 --end-year 2025   # ~25 min, resumable
+python data_prep/build_dataset.py                                                      # -> data/pitches.parquet, data/vocab.json
+python data_prep/baselines.py                                                          # count-based baselines
+```
+
+- **Sequence unit:** pitches of one pitcher in one game, grouped by `(game_pk, pitcher_id)` and ordered by `game_pitch_number`. `balls`, `strikes`, `outs`, base runners and score are the state before the pitch.
+- **Target:** `y`, a 0-10 pitch-class id (see `data/vocab.json`; `-1` = missing label, not a training target). `p1`-`p3` are the previous three pitch classes by the same pitcher in the game.
+- **Leakage:** columns listed in `vocab.json["leaky_columns"]` describe the pitch or the plate appearance outcome and must not be inputs. The previous pitch's results are available as `prev_call_code`, `prev_speed`, `prev_plate_x`, `prev_plate_z`.
+- **Splits:** train 2017-2023, val 2024, test 2025.
+- **Caveats:** `ST` (sweeper) is 0.6% of 2017 pitches and 7.6% of 2025 pitches (the feed's labeling changed); 2020 is a 60-game season; 23% of 2025 pitches are thrown by pitchers absent from 2017-2023, so a pitcher-ID embedding alone will not cover them.
+
+Baselines to beat (test, 2025; 724k pitches; Dirichlet-smoothed class frequencies fitted on train):
+
+| Baseline | Top-1 accuracy | Log loss |
+|---|---|---|
+| Global pitch mix | 0.319 | 2.019 |
+| Per pitcher | 0.370 | 1.788 |
+| Per pitcher x count | 0.375 | 1.800 |
+| Per pitcher x count x previous pitch | 0.379 | 1.798 |
+
 ## Model Details
 
 ### Algorithm
