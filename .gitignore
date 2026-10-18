@@ -116,3 +116,9 @@ Thumbs.db
 *.temp
 .tmp/
 .temp/
+
+# Local venv and collected data (regenerate with data_collection/)
+.pitch_sequence/
+pitch_data/
+data/
+test_data/
